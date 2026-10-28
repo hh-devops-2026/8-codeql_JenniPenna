@@ -46,8 +46,17 @@ jobs:
 
       - name: Test /readfile
         run: |
-          sleep 5
-          curl -f "http://localhost:8080/readfile?file=safe-files/hello.txt"
+          for i in {1..10}; do
+            if curl -f "http://localhost:8080/readfile?file=safe-files/hello.txt"; then
+              exit 0
+            fi
+            echo "Server not ready yet, retrying ($i/10)..."
+            sleep 2
+          done
+          echo "Server did not respond. Container state and logs:"
+          docker ps -a
+          docker logs app
+          exit 1
 
       - name: Stop container
         if: always()
