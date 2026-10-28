@@ -45,18 +45,7 @@ jobs:
         run: docker run -d --name app -p 8080:8080 go-web-server
 
       - name: Test /readfile
-        run: |
-          for i in {1..10}; do
-            if curl -f "http://localhost:8080/readfile?file=safe-files/hello.txt"; then
-              exit 0
-            fi
-            echo "Server not ready yet, retrying ($i/10)..."
-            sleep 2
-          done
-          echo "Server did not respond. Container state and logs:"
-          docker ps -a
-          docker logs app
-          exit 1
+        run: curl -f --retry 10 --retry-delay 2 --retry-all-errors "http://localhost:8080/readfile?file=safe-files/hello.txt"
 
       - name: Stop container
         if: always()
